@@ -1,7 +1,10 @@
 import os
+import random
 import sys
 import re
 from openai import OpenAI
+
+from config import SYSTEM_PROMPTS
 
 
 def parse_markdown(file_path):
@@ -45,7 +48,7 @@ def summarize_transcript(file_path):
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a specialized financial analyst.Your goal is to extract actionable insights from a finance youtube video transcripts. Always output concise and informative summary in structured Markdown. keep it concise but informative. Avoid fluff, repetition, or promotional content. If an information isn't a insight omit it. Focus on key takeaways, trends, and actionable advice relevant to investors and traders. Always provide clear, concise summaries that highlight the most important insights from the transcript.",
+                    "content": """Your goal is to extract actionable insights from a finance youtube video transcripts. Always output concise and informative summary in english and structured Markdown. Avoid fluff, repetition, or promotional content. Focus on key takeaways, Price Targets/Levels, trends, and advice relevant to investors. If an information isn't a insight or not related to market omit it""",
                 },
                 {
                     "role": "user",

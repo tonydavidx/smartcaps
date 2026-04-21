@@ -3,20 +3,38 @@ import sys
 from datetime import datetime
 import urllib.request
 import re
+import json
 
 
-def get_video_title(video_id):
+def get_video_metadata(video_id):
+    metadata = {"title": "YouTube Video", "upload_date": "Unknown"}
     try:
         url = f"https://www.youtube.com/watch?v={video_id}"
         with urllib.request.urlopen(url) as response:
             html = response.read().decode()
-            match = re.search(r"<title>(.*?)</title>", html)
-            if match:
-                title = match.group(1).replace(" - YouTube", "")
-                return title
-    except:
-        pass
-    return "YouTube Video"
+
+            # Get Title
+            title_match = re.search(r"<title>(.*?)</title>", html)
+            if title_match:
+                metadata["title"] = title_match.group(1).replace(" - YouTube", "")
+
+            # Get Upload Date (Look for schema.org metadata)
+            date_match = re.search(r'"uploadDate":"(.*?)"', html)
+            if date_match:
+                # Format: 2024-04-12T07:00:01-07:00 -> 2024-04-12
+                metadata["upload_date"] = date_match.group(1).split("T")[0]
+            else:
+                # Fallback: Look for publication date in other tags
+                date_match = re.search(
+                    r'itemprop="datePublished" content="(.*?)"', html
+                )
+                if date_match:
+                    metadata["upload_date"] = date_match.group(1).split("T")[0]
+
+    except Exception as e:
+        print(f"Warning: Could not fetch full metadata ({e})")
+
+    return metadata
 
 
 def download_transcript(video_id):
@@ -33,14 +51,15 @@ def download_transcript(video_id):
             clean_text = "\n".join([item["text"] for item in fetched_data])
 
         # Metadata
-        title = get_video_title(video_id)
+        meta = get_video_metadata(video_id)
         url = f"https://www.youtube.com/watch?v={video_id}"
-        date_str = datetime.now().strftime("%Y-%m-%d")
+        fetch_date = datetime.now().strftime("%Y-%m-%d")
 
         # Markdown with Frontmatter
         md_content = f"""---
-date: {date_str}
-title: "{title}"
+fetch_date: {fetch_date}
+upload_date: {meta["upload_date"]}
+title: "{meta["title"]}"
 url: {url}
 ---
 
@@ -60,4 +79,14 @@ url: {url}
 
 
 if __name__ == "__main__":
-    download_transcript("RK1ZdGcZHrA")
+    if len(sys.argv) < 2:
+        print("Usage: python download_transcription.py <video_id>")
+        sys.exit(1)
+
+    video_id = sys.argv[1]
+    if "v=" in video_id:
+        video_id = video_id.split("v=")[1].split("&")[0]
+    elif "/" in video_id:
+        video_id = video_id.split("/")[-1]
+
+    download_transcript(video_id)
