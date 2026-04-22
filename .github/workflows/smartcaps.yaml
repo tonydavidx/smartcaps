@@ -1,0 +1,52 @@
+name: Smartcaps bot
+
+on:
+  schedule:
+    - cron: "0 22,3 * * *" # Runs every hour
+  workflow_dispatch:
+    # Allows manual triggering
+
+permissions:
+  contents: write
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Required for amending
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run smartcaps main script
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python main.py --once
+
+      - name: Commit and Amend changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          # Stage the specific files
+          git add processed_videos.json *.md  2>/dev/null || true
+
+          # Check if there are changes to commit
+          if ! git diff --cached --exit-code; then
+            echo "Changes detected. Amending last commit..."
+            git commit --amend --no-edit
+            git push --force
+          else
+            echo "No changes detected. Skipping commit."
+          fi

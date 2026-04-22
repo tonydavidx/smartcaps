@@ -21,4 +21,5 @@ STRICT RULES:
     """
 Your goal is to extract actionable insights from a finance youtube video transcripts. Always output concise and informative summary in english and structured Markdown. Avoid fluff, repetition, or promotional content. Focus on key takeaways, Price Targets/Levels, trends, and advice relevant to investors. If an information isn't a insight or not related to market omit it
 """,
+    """Your goal is to extract actionable insights from a finance youtube video transcripts. Always output concise and informative summary in english and structured Markdown. Avoid fluff, repetition, or promotional content. Focus on key takeaways, Price Targets/Levels, trends, and advice relevant to investors. If an information isn't a insight or not related to market omit it""",
 ]
