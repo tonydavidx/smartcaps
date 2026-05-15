@@ -6,12 +6,18 @@ from telegram import Bot
 from telegram.constants import ParseMode
 from dotenv import load_dotenv
 
-# Try to load local env if it exists (for local dev)
-env_path = "D:/Documents/Python/variables.env"
+# Dynamic path for .env file
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+env_path = os.path.join(BASE_DIR, "variables.env")
+dot_env_path = os.path.join(BASE_DIR, ".env")
+fixed_path = "D:/Documents/Python/variables.env"
+
 if os.path.exists(env_path):
     load_dotenv(env_path)
-elif os.path.exists(".env"):
-    load_dotenv(".env")
+elif os.path.exists(dot_env_path):
+    load_dotenv(dot_env_path)
+elif os.path.exists(fixed_path):
+    load_dotenv(fixed_path)
 
 async def send_to_telegram(file_path):
     # GitHub Actions will provide these via repository secrets

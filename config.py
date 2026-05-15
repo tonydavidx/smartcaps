@@ -1,8 +1,14 @@
+import os
+
+
 CHANNELS = [
     "https://www.youtube.com/@MoneyPechu/videos",
     "https://www.youtube.com/@RetailOptions/videos",
+    "https://www.youtube.com/@Greyanswers/videos",
+    "https://www.youtube.com/@finance.boosan/videos",
 ]
 
+ROOT_FOLDER = os.path.dirname(os.path.abspath(__file__))
 SYSTEM_PROMPTS = [
     """
 "You are a Senior Equity Analyst. Your goal is to extract actionable insights from Indian finance YouTube transcripts. 

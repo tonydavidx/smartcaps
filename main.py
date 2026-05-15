@@ -1,6 +1,7 @@
 import subprocess
 import sys
 import os
+from config import ROOT_FOLDER
 from monitor import start_monitoring
 
 
@@ -20,22 +21,25 @@ def run_command(command):
 
 
 def run_pipeline(video_input):
-    success, transcript_file = run_command(["download_transcription.py", video_input])
+    success, transcript_file = run_command(
+        [f"{ROOT_FOLDER}/download_transcription.py", video_input]
+    )
     if not success or not transcript_file:
         return False
 
-    success, summary_file = run_command(["transcript_GPT.py", transcript_file])
+    success, summary_file = run_command(
+        [f"{ROOT_FOLDER}/transcript_GPT.py", transcript_file]
+    )
     if not success or not summary_file:
         return False
 
-    success, _ = run_command(["telegram_bot.py", summary_file])
+    success, _ = run_command([f"{ROOT_FOLDER}/telegram_bot.py", summary_file])
     return success
 
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         if sys.argv[1] == "--once":
-            # For GitHub Actions: Run the scanner once and exit
             from monitor import check_for_new_videos
 
             check_for_new_videos(run_pipeline)

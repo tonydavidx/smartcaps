@@ -3,14 +3,20 @@ import sys
 import re
 from openai import OpenAI
 from dotenv import load_dotenv
-from config import SYSTEM_PROMPTS
+from config import ROOT_FOLDER, SYSTEM_PROMPTS
 
 # Environment loading
-env_path = "D:/Documents/Python/variables.env"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+env_path = os.path.join(BASE_DIR, "variables.env")
+dot_env_path = os.path.join(BASE_DIR, ".env")
+fixed_path = "D:/Documents/Python/variables.env"
+
 if os.path.exists(env_path):
     load_dotenv(env_path)
-elif os.path.exists(".env"):
-    load_dotenv(".env")
+elif os.path.exists(dot_env_path):
+    load_dotenv(dot_env_path)
+elif os.path.exists(fixed_path):
+    load_dotenv(fixed_path)
 
 
 def parse_markdown(file_path):
@@ -26,7 +32,7 @@ def parse_markdown(file_path):
 
 
 def summarize_transcript(file_path):
-    summary_dir = "summary"
+    summary_dir = f"{ROOT_FOLDER}/summary"
     if not os.path.exists(summary_dir):
         os.makedirs(summary_dir)
 

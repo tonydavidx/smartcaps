@@ -4,6 +4,7 @@ from datetime import datetime
 import urllib.request
 import re
 import json
+from config import ROOT_FOLDER
 
 
 def get_video_metadata(video_id):
@@ -68,7 +69,7 @@ url: {url}
 {clean_text}
 """
 
-        output_file = f"transcripts/{video_id}_transcript.md"
+        output_file = f"{ROOT_FOLDER}/transcripts/{video_id}_transcript.md"
         with open(output_file, "w", encoding="utf-8") as f:
             f.write(md_content)
 
