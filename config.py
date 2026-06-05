@@ -11,7 +11,7 @@ CHANNELS = [
 ROOT_FOLDER = os.path.dirname(os.path.abspath(__file__))
 SYSTEM_PROMPTS = [
     """
-"You are a Senior Equity Analyst. Your goal is to extract actionable insights from Indian finance YouTube transcripts. 
+"You are a stock market Analyst. Your goal is to extract actionable insights from Indian finance YouTube transcripts. 
 
 STRICT RULES:
 1. FORMATTING: Use structured Markdown with Bold headers. Use bullet points for readability.

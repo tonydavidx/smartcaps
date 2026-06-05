@@ -77,6 +77,7 @@ url: {url}
 
     except Exception as e:
         print(f"ERROR: {str(e)}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

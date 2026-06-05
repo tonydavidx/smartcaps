@@ -39,7 +39,7 @@ def summarize_transcript(file_path):
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         print("ERROR: OPENAI_API_KEY not found.")
-        return None
+        sys.exit(1)
 
     client = OpenAI(api_key=api_key)
 
@@ -47,13 +47,13 @@ def summarize_transcript(file_path):
         frontmatter, transcript_content = parse_markdown(file_path)
         if not transcript_content.strip():
             print("ERROR: Empty transcript.")
-            return None
+            sys.exit(1)
 
         print(f"Summarizing {file_path}...")
         system_msg = SYSTEM_PROMPTS[0].strip()
 
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": system_msg},
                 {
@@ -79,7 +79,7 @@ def summarize_transcript(file_path):
         return summary_path
     except Exception as e:
         print(f"ERROR: {str(e)}")
-        return None
+        sys.exit(1)
 
 
 if __name__ == "__main__":

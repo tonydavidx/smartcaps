@@ -9,7 +9,12 @@ def run_command(command):
     print(f"\n--- Running: {' '.join(command)} ---")
     result = subprocess.run([sys.executable] + command, capture_output=True, text=True)
     if result.returncode != 0:
+        error_msg = f"Command failed: {' '.join(command)}\n\nError: {result.stderr}"
         print(f"FAILED: {result.stderr}")
+        # Send error to telegram
+        subprocess.run(
+            [sys.executable, f"{ROOT_FOLDER}/telegram_bot.py", "--error", error_msg]
+        )
         return False, None
 
     print(result.stdout.strip())
@@ -28,7 +33,7 @@ def run_pipeline(video_input):
         return False
 
     success, summary_file = run_command(
-        [f"{ROOT_FOLDER}/transcript_GPT.py", transcript_file]
+        [f"{ROOT_FOLDER}/summary_bot.py", transcript_file]
     )
     if not success or not summary_file:
         return False

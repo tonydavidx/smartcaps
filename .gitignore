@@ -1,3 +1,6 @@
 /summary
 /transcripts
 /.venv
+/__pycache__
+*.pyc
+*.pyo

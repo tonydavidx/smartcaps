@@ -19,6 +19,29 @@ elif os.path.exists(dot_env_path):
 elif os.path.exists(fixed_path):
     load_dotenv(fixed_path)
 
+async def send_error_message(message):
+    token = os.getenv("TELEGRAM_BOT_TOKEN")
+    chat_id = os.getenv("TELEGRAM_CHAT_ID")
+
+    if not token or not chat_id:
+        print("ERROR: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not found in environment.")
+        return
+
+    try:
+        bot = Bot(token=token)
+        final_message = f"❌ <b>Error in SmartCaps Pipeline</b>\n\n{message}"
+        if len(final_message) > 4090:
+            final_message = final_message[:4090] + "..."
+
+        await bot.send_message(
+            chat_id=chat_id,
+            text=final_message,
+            parse_mode=ParseMode.HTML,
+        )
+        print("SUCCESS: Error message sent to Telegram.")
+    except Exception as e:
+        print(f"ERROR: {str(e)}")
+
 async def send_to_telegram(file_path):
     # GitHub Actions will provide these via repository secrets
     token = os.getenv("TELEGRAM_BOT_TOKEN")
@@ -79,6 +102,13 @@ async def send_to_telegram(file_path):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python telegram_bot.py <path_to_summary_md>")
+        print("Usage: python telegram_bot.py <path_to_summary_md> OR python telegram_bot.py --error <message>")
         sys.exit(1)
-    asyncio.run(send_to_telegram(sys.argv[1]))
+    
+    if sys.argv[1] == "--error":
+        if len(sys.argv) < 3:
+            print("Error: No message provided for --error")
+            sys.exit(1)
+        asyncio.run(send_error_message(sys.argv[2]))
+    else:
+        asyncio.run(send_to_telegram(sys.argv[1]))
