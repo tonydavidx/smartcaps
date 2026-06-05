@@ -1,6 +1,6 @@
 import json
 import os
-import scrapetube
+import yt_dlp
 from config import CHANNELS
 
 # Dynamically get the directory where this script is located
@@ -20,6 +20,31 @@ def save_processed_videos(processed_set):
     with open(DB_FILE, "w") as f:
         json.dump(list(processed_set), f)
 
+def get_latest_video_ids(channel_url, limit=3):
+    """Uses yt-dlp to get the latest video IDs from a channel URL."""
+    ydl_opts = {
+        'extract_flat': 'in_playlist',
+        'playlist_items': f'1:{limit}',
+        'quiet': True,
+        'no_warnings': True,
+        # Only get actual videos, skip shorts/streams if possible via filter
+        'match_filter': lambda info: None if info.get('duration') and info.get('duration') > 60 else 'Skip shorts'
+    }
+    
+    video_ids = []
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        try:
+            # Note: /videos suffix helps yt-dlp focus on the video tab
+            target_url = channel_url if channel_url.endswith('/videos') else f"{channel_url.rstrip('/')}/videos"
+            info = ydl.extract_info(target_url, download=False)
+            if 'entries' in info:
+                # filter out None entries and get ids
+                video_ids = [entry['id'] for entry in info['entries'] if entry and 'id' in entry]
+        except Exception as e:
+            print(f"Error fetching videos for {channel_url}: {e}")
+            
+    return video_ids
+
 def check_for_new_videos(pipeline_func):
     processed = load_processed_videos()
     any_new_video = False
@@ -27,10 +52,10 @@ def check_for_new_videos(pipeline_func):
     for channel_url in CHANNELS:
         print(f"\nScanning channel: {channel_url}")
         try:
-            # Fetch latest 3 regular videos
-            videos = scrapetube.get_channel(channel_url=channel_url, limit=3, content_type="videos")
-            for video in videos:
-                video_id = video["videoId"]
+            # Use yt-dlp instead of scrapetube
+            video_ids = get_latest_video_ids(channel_url, limit=3)
+            
+            for video_id in video_ids:
                 if video_id not in processed:
                     print(f"NEW VIDEO DETECTED: {video_id}")
                     # Run the pipeline
