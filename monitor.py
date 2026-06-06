@@ -90,12 +90,13 @@ def check_for_new_videos(pipeline_func):
                     # Run the pipeline
                     success = pipeline_func(video_id)
 
-                    # Mark as processed to avoid retry loops on permanent failures
-                    processed.add(video_id)
-                    save_processed_videos(processed)
-
                     if success:
+                        # Mark as processed only after successful completion
+                        processed.add(video_id)
+                        save_processed_videos(processed)
                         any_new_video = True
+                    else:
+                        print(f"PIPELINE FAILED for {video_id}. Will not mark as processed.")
                 else:
                     print(f"Skipping {video_id} (already processed).")
         except Exception as e:

@@ -41,6 +41,7 @@ async def send_error_message(message):
         print("SUCCESS: Error message sent to Telegram.")
     except Exception as e:
         print(f"ERROR: {str(e)}")
+        sys.exit(1)
 
 async def send_to_telegram(file_path):
     # GitHub Actions will provide these via repository secrets
@@ -99,6 +100,7 @@ async def send_to_telegram(file_path):
         print("SUCCESS: Sent to Telegram.")
     except Exception as e:
         print(f"ERROR: {str(e)}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
