@@ -84,17 +84,24 @@ def check_for_new_videos(pipeline_func):
         try:
             # Use yt-dlp instead of scrapetube
             video_ids = get_latest_video_ids(channel_url, limit=6)
+            
+            videos_processed_this_channel = 0
             for video_id in video_ids:
+                if videos_processed_this_channel >= 2:
+                    print(f"Reached limit of 2 videos for this channel. Skipping remaining.")
+                    break
+
                 if video_id not in processed:
                     print(f"NEW VIDEO DETECTED: {video_id}")
                     # Run the pipeline
-                    success = pipeline_func(video_id)
+                    success = pipeline_func(video_id, channel_url)
 
                     if success:
                         # Mark as processed only after successful completion
                         processed.add(video_id)
                         save_processed_videos(processed)
                         any_new_video = True
+                        videos_processed_this_channel += 1
                     else:
                         print(f"PIPELINE FAILED for {video_id}. Will not mark as processed.")
                 else:

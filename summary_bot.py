@@ -35,13 +35,14 @@ def parse_markdown(file_path):
     return frontmatter, transcript_text
 
 
-def summarize_transcript(file_path):
+def summarize_transcript(file_path, channel_url=None):
     max_retries = 5
     summary_dir = f"{ROOT_FOLDER}/summary"
     if not os.path.exists(summary_dir):
         os.makedirs(summary_dir)
 
     api_key = os.getenv("AISTUDIO_API_KEY")
+    print(f"Using API Key: {api_key[:4]}...{api_key[-4:]}")
     if not api_key:
         print("ERROR: AISTUDIO KEY not found.")
         sys.exit(1)
@@ -54,7 +55,16 @@ def summarize_transcript(file_path):
         sys.exit(1)
 
     print(f"Summarizing {file_path}...")
-    system_msg = SYSTEM_PROMPTS[0].strip()
+
+    # Select prompt based on channel
+    if channel_url and any(
+        name.lower() in channel_url.lower()
+        for name in ["Greyanswers", "finance.boosan"]
+    ):
+        print(f"Using alternative prompt for channel: {channel_url}")
+        system_msg = SYSTEM_PROMPTS[1].strip()
+    else:
+        system_msg = SYSTEM_PROMPTS[0].strip()
 
     gemini_config = types.GenerateContentConfig(
         system_instruction=system_msg,
@@ -66,7 +76,7 @@ def summarize_transcript(file_path):
     for attempt in range(max_retries):
         try:
             response = client.models.generate_content(
-                model="gemini-2.5-flash",
+                model="gemini-2.0-flash",
                 contents=transcript_content,
                 config=gemini_config,
             )
@@ -102,6 +112,9 @@ def summarize_transcript(file_path):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python transcript_GPT.py <path_to_transcript_md>")
+        print("Usage: python summary_bot.py <path_to_transcript_md> [channel_url]")
         sys.exit(1)
-    summarize_transcript(sys.argv[1])
+
+    file_arg = sys.argv[1]
+    channel_arg = sys.argv[2] if len(sys.argv) > 2 else None
+    summarize_transcript(file_arg, channel_arg)
